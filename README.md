@@ -1,7 +1,5 @@
 <h1 align="center">
-
-<img src="https://raw.githubusercontent.com/brunowbbs/ignews/main/public/images/avatar.svg" alt="rocketshoes" width="100px"/>
-
+<img alt = "Web app" src = "./.github/avatar.svg" alt="ignews" width="100px" />
 </h1>
 
 <p align="center">
