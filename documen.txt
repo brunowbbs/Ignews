@@ -1,0 +1,3 @@
+VARIAVEIS DE AMBIENTE:
+
+.env.local =>
