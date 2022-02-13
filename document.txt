@@ -1,0 +1,5 @@
+VARIAVEIS DE AMBIENTE:
+
+-> As variáveis de ambiente so ficam disponível nos métodos getStaticProps getServerSideProps e nos arquivos de Api Routes.
+
+-> Para utilizar uma variavel de ambiente no browser ela deve iniciar NEXT_PUBLIC_KEY_NAME
