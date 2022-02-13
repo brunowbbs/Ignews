@@ -1,6 +1,17 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import { query as q } from "faunadb";
 import { getSession } from "next-auth/react";
 import { stripe } from "../../services/stripe";
+import { fauna } from "../../services/fauna";
+
+type User = {
+  ref: {
+    id: string;
+  };
+  data: {
+    stripe_customer_id: string;
+  };
+};
 
 export default async function (
   request: NextApiRequest,
@@ -12,14 +23,33 @@ export default async function (
     //Acessar dados do usuario nos cookies
     const session = await getSession({ req: request });
 
-    console.log(session);
+    //Buscando usuario no  faunaDB
+    const user = await fauna.query<User>(
+      q.Get(q.Match(q.Index("user_by_email"), q.Casefold(session.user.email)))
+    );
 
-    const stiperCustomer = await stripe.customers.create({
-      email: session.user.email,
-    });
+    //Verificando se o usuario ja possui conta no stripe
+    let customerId = user.data.stripe_customer_id;
+
+    if (!customerId) {
+      const stripeCustomer = await stripe.customers.create({
+        email: session.user.email,
+      });
+
+      //Atualizando usuario
+      await fauna.query(
+        q.Update(q.Ref(q.Collection("users"), user.ref.id), {
+          data: {
+            stripe_customer_id: stripeCustomer.id,
+          },
+        })
+      );
+
+      customerId = stripeCustomer.id;
+    }
 
     const stripeCheckoutSession = await stripe.checkout.sessions.create({
-      customer: stiperCustomer.id,
+      customer: customerId,
       payment_method_types: ["card"],
       billing_address_collection: "required", //preencher endereço
       line_items: [
